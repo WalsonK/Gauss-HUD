@@ -1,13 +1,14 @@
-import { TextView } from '@wearables-ui-toolkit/mrbd';
+import { IconImage, TextView } from '@wearables-ui-toolkit/mrbd';
 import { useHud, useI18n } from '../../core/hud.tsx';
 import { toQuickActions } from '../../core/view/commands.ts';
 import { toStatusView } from '../../core/view/status.ts';
 import { BatteryRing } from './BatteryRing.tsx';
+import { lockIcon, lockOpenIcon } from './icons.ts';
 import { QuickActions } from './QuickActions.tsx';
 import { UsageBar } from './UsageBar.tsx';
 import styles from './hud.module.css';
 
-/** The single screen: API credit on top, vehicle at a glance in the middle, quick actions below. */
+/** The single screen: API credit on top, vehicle at a glance, quick actions, then lock state and data age. */
 export function HomeScreen() {
   const { snapshot, refreshing, running, now } = useHud();
   const i18n = useI18n();
@@ -33,7 +34,7 @@ export function HomeScreen() {
             {view?.climate}
           </TextView>
         </div>
-        {view && <BatteryRing progress={view.batteryProgress} label={view.batteryLabel} />}
+        {view && <BatteryRing progress={view.batteryProgress} value={view.battery} label={view.batteryLabel} />}
         <div className={`${styles.side} ${styles.sideEnd}`}>
           <TextView textStyle="heading1" as="p">
             {view?.range ?? '—'}
@@ -49,13 +50,23 @@ export function HomeScreen() {
         </div>
       </section>
 
-      <TextView className={styles.statusLine} textStyle="meta1" textColor="secondary" role="status" as="p">
-        {statusLine}
-      </TextView>
-
       <nav aria-label={t.home.actions}>
         <QuickActions actions={actions} />
       </nav>
+
+      <div className={styles.statusLine}>
+        {status && (
+          <>
+            <IconImage source={status.locked ? lockIcon : lockOpenIcon} className={styles.statusIcon} />
+            <TextView textStyle="meta1" textColor="secondary" as="span">
+              {view?.lock} ·
+            </TextView>
+          </>
+        )}
+        <TextView textStyle="meta1" textColor="secondary" role="status" as="span">
+          {statusLine}
+        </TextView>
+      </div>
     </main>
   );
 }

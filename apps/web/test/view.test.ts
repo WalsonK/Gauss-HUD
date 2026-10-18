@@ -53,11 +53,11 @@ describe('status view', () => {
 describe('quick actions', () => {
   const all = new MockVehicleProvider().capabilities;
 
-  it('lists lock, trunk, guard, charge port, climate, charging, in that order', () => {
+  it('lists trunk, guard, charge port, climate, charging, in that order (lock is a state, not a button)', () => {
     const actions = toQuickActions(all, { ...base, climateOn: true, guardOn: true }, en);
     assert.deepEqual(
       actions.map((a) => a.command),
-      ['lock', 'trunk.rear', 'guard.off', 'chargePort.close', 'climate.off', 'charging.stop'],
+      ['trunk.rear', 'guard.off', 'chargePort.close', 'climate.off', 'charging.stop'],
     );
     assert.deepEqual(
       actions.filter((a) => a.active).map((a) => a.key),
@@ -66,20 +66,11 @@ describe('quick actions', () => {
     assert.equal(actions.find((a) => a.key === 'trunk')?.needsPin, true);
   });
 
-  it('marks the lock as done when already locked, and never offers to unlock', () => {
-    const locked = toQuickActions(all, base, fr).find((a) => a.key === 'lock');
-    assert.equal(locked?.done, true);
-    assert.equal(locked.label, 'Verrouillée');
-    const unlocked = toQuickActions(all, { ...base, locked: false }, en).find((a) => a.key === 'lock');
-    assert.equal(unlocked?.done, false);
-    assert.equal(unlocked.command, 'lock');
-  });
-
   it('hides commands the vehicle does not support', () => {
     const actions = toQuickActions(['lock', 'climate.on', 'climate.off'], base, en);
     assert.deepEqual(
       actions.map((a) => a.key),
-      ['lock', 'climate'],
+      ['climate'],
     );
   });
 });

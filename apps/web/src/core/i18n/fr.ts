@@ -58,7 +58,6 @@ export const fr: Messages = {
     sending: 'Envoi…',
     waking: 'Réveil de la voiture…',
     busy: 'Une autre commande est en cours',
-    alreadyLocked: 'Déjà verrouillée',
   },
   outcome: {
     ok: 'OK',

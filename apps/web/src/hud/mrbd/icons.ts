@@ -13,15 +13,6 @@ const icon = (...d: string[]): IconSource => ({
   paths: d.map((path) => ({ d: path, ...stroke })),
 });
 
-/** Generic front view of a car (no specific make or model). */
-export const carIcon = icon(
-  'M5 11l2-5h10l2 5',
-  'M3 12a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z',
-  'M6 17v2',
-  'M18 17v2',
-  'M6.5 14h2',
-  'M15.5 14h2',
-);
 export const fanIcon = icon(
   'M12 12c0-4 1-7 4-7 2 0 3 2 1 4l-5 3',
   'M12 12c4 0 7 1 7 4 0 2-2 3-4 1l-3-5',

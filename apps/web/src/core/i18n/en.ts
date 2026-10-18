@@ -58,7 +58,6 @@ export const en = {
     sending: 'Sending…',
     waking: 'Waking up the car…',
     busy: 'Another command is running',
-    alreadyLocked: 'Already locked',
   },
   outcome: {
     ok: 'Done',

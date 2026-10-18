@@ -48,15 +48,22 @@
   place-items: center;
 }
 
-.ringIcon {
+.ringValue {
   position: absolute;
-  inline-size: 88px;
-  block-size: 88px;
-  color: var(--uit-color-text-primary, #fff);
 }
 
+/* Bottom line: lock state and data age (or command progress). */
 .statusLine {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.statusIcon {
+  inline-size: 20px;
+  block-size: 20px;
+  color: var(--uit-color-text-secondary, #bbb);
 }
 
 /* Full-screen routes without a tab bar: pairing and PIN. */
