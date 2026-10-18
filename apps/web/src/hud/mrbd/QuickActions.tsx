@@ -2,18 +2,23 @@ import { Button, ButtonRail, Toast, type IconSource } from '@wearables-ui-toolki
 import { useNavigate } from 'react-router-dom';
 import { useHud, useI18n } from '../../core/hud.tsx';
 import type { QuickAction, QuickActionKey } from '../../core/view/commands.ts';
-import { boltIcon, fanIcon, guardIcon, plugIcon, trunkIcon } from './icons.ts';
+import { boltIcon, fanIcon, guardIcon, trunkIcon } from './icons.ts';
 
 const ICONS: Record<QuickActionKey, IconSource> = {
+  climate: fanIcon,
   trunk: trunkIcon,
   guard: guardIcon,
-  chargePort: plugIcon,
-  climate: fanIcon,
-  charging: boltIcon,
+  charge: boltIcon,
 };
 
-/** Row of round buttons, left to right as in the phone app; the rail scrolls to the last ones. */
-export function QuickActions({ actions }: { actions: readonly QuickAction[] }) {
+interface Props {
+  actions: readonly QuickAction[];
+  /** Short text shown on a button next to its icon, e.g. the cabin temperature on climate. */
+  details?: Partial<Record<QuickActionKey, string>>;
+}
+
+/** Row of round buttons, most used first; the first one gets the focus, so it is one tap away. */
+export function QuickActions({ actions, details = {} }: Props) {
   const { running, send } = useHud();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -37,6 +42,8 @@ export function QuickActions({ actions }: { actions: readonly QuickAction[] }) {
         <Button
           key={action.key}
           icon={ICONS[action.key]}
+          title={details[action.key]}
+          alwaysShowText={Boolean(details[action.key])}
           showIconActiveIndicator={action.active}
           ariaLabel={action.label}
           tooltipText={action.label}

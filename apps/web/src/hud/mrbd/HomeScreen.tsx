@@ -2,13 +2,13 @@ import { IconImage, TextView } from '@wearables-ui-toolkit/mrbd';
 import { useHud, useI18n } from '../../core/hud.tsx';
 import { toQuickActions } from '../../core/view/commands.ts';
 import { toStatusView } from '../../core/view/status.ts';
-import { BatteryRing } from './BatteryRing.tsx';
+import { BatteryBar } from './BatteryBar.tsx';
 import { lockIcon, lockOpenIcon } from './icons.ts';
 import { QuickActions } from './QuickActions.tsx';
 import { UsageBar } from './UsageBar.tsx';
 import styles from './hud.module.css';
 
-/** The single screen: API credit on top, vehicle at a glance, quick actions, then lock state and data age. */
+/** The single screen: alerts if any, battery, quick actions (the hero), then lock state and data age. */
 export function HomeScreen() {
   const { snapshot, refreshing, running, now } = useHud();
   const i18n = useI18n();
@@ -25,33 +25,10 @@ export function HomeScreen() {
     <main className={styles.home} aria-label={t.home.label}>
       <UsageBar usage={view?.usage ?? null} badge={view?.badge ?? null} />
 
-      <section className={styles.glance}>
-        <div className={styles.side}>
-          <TextView textStyle="heading1" as="p">
-            {view?.cabin ?? '—'}
-          </TextView>
-          <TextView textStyle="body2" textColor="secondary" as="p">
-            {view?.climate}
-          </TextView>
-        </div>
-        {view && <BatteryRing progress={view.batteryProgress} value={view.battery} label={view.batteryLabel} />}
-        <div className={`${styles.side} ${styles.sideEnd}`}>
-          <TextView textStyle="heading1" as="p">
-            {view?.range ?? '—'}
-          </TextView>
-          <TextView textStyle="body2" textColor="secondary" as="p">
-            {view?.chargingValue}
-          </TextView>
-          {view?.chargingDetail && (
-            <TextView textStyle="body2" textColor="secondary" as="p">
-              {view.chargingDetail}
-            </TextView>
-          )}
-        </div>
-      </section>
+      {view && <BatteryBar {...view} />}
 
-      <nav aria-label={t.home.actions}>
-        <QuickActions actions={actions} />
+      <nav className={styles.actions} aria-label={t.home.actions}>
+        <QuickActions actions={actions} details={view && status?.cabinTempC != null ? { climate: view.cabin } : {}} />
       </nav>
 
       <div className={styles.statusLine}>

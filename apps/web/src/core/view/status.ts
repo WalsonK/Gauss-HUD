@@ -11,8 +11,8 @@ export interface StatusView {
   readonly range: string;
   /** "Charging" / "Not charging". */
   readonly charging: string;
-  /** Charging power, or whether the cable is plugged in. */
-  readonly chargingValue: string;
+  /** Charging power, or whether the cable is plugged in; null when unplugged. */
+  readonly chargingValue: string | null;
   readonly chargingDetail: string | null;
   readonly lock: string;
   readonly cabin: string;
@@ -20,9 +20,20 @@ export interface StatusView {
   readonly updated: string;
   /** Asleep or offline: the figures come from the last read. */
   readonly badge: string | null;
-  /** API spend vs monthly credit: short text, spoken label and fill from 0 to 1. */
-  readonly usage: { readonly text: string; readonly label: string; readonly progress: number } | null;
+  /**
+   * API spend vs monthly credit: short text, spoken label, fill from 0 to 1, and whether it nears
+   * the credit (from {@link USAGE_ALERT_RATIO}), the only case a glanceable HUD needs to show it.
+   */
+  readonly usage: {
+    readonly text: string;
+    readonly label: string;
+    readonly progress: number;
+    readonly alert: boolean;
+  } | null;
 }
+
+/** Share of the monthly credit from which the API spend is worth flagging. */
+export const USAGE_ALERT_RATIO = 0.8;
 
 export function formatUpdated(updatedAt: string, now: number, { t }: I18n): string {
   const minutes = Math.max(0, Math.floor((now - Date.parse(updatedAt)) / 60_000));
@@ -41,7 +52,7 @@ export function toStatusView(status: VehicleStatus, usage: UsageSummary | null, 
     new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 
   const { charging } = status;
-  let chargingValue = '—';
+  let chargingValue: string | null = null;
   if (charging) chargingValue = `${number(charging.powerKw, 1)} kW`;
   else if (status.pluggedIn) chargingValue = t.status.pluggedIn;
   const chargingDetail = charging?.endsAt ? t.status.chargingEnds(time(charging.endsAt)) : null;
@@ -51,10 +62,12 @@ export function toStatusView(status: VehicleStatus, usage: UsageSummary | null, 
   if (usage) {
     const cost = money(usage.monthCost, usage.currency);
     const credit = money(usage.monthlyCredit, usage.currency);
+    const progress = usage.monthlyCredit > 0 ? Math.min(1, usage.monthCost / usage.monthlyCredit) : 1;
     usageView = {
       text: t.status.usage(cost, credit),
       label: t.status.usageLabel(cost, credit),
-      progress: usage.monthlyCredit > 0 ? Math.min(1, usage.monthCost / usage.monthlyCredit) : 1,
+      progress,
+      alert: progress >= USAGE_ALERT_RATIO,
     };
   }
 

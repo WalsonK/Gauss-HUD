@@ -1,9 +1,7 @@
-/* Single home screen: credit strip / vehicle at a glance / status line / quick actions. */
+/* Single home screen: alerts (only when something is off) / battery / quick actions / status line. */
 .home {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
-  /* Without this, the button rail's intrinsic width widens the column past the screen. */
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   block-size: 100%;
   padding: 24px 24px 20px;
@@ -22,34 +20,24 @@
   min-block-size: 32px;
 }
 
-.glance {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+.battery {
+  display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.side {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.batteryFill {
+  flex: 1;
   min-inline-size: 0;
-  overflow-wrap: anywhere;
 }
 
-.sideEnd {
-  align-items: flex-end;
-  text-align: end;
-}
-
-.ring {
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-
-.ringValue {
-  position: absolute;
+/* The quick actions take the free space and sit in its middle: the hero of the screen. */
+.actions {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-block-size: 0;
 }
 
 /* Bottom line: lock state and data age (or command progress). */

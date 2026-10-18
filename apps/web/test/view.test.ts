@@ -29,6 +29,7 @@ describe('status view', () => {
     assert.equal(view.badge, null);
     assert.equal(view.usage?.text, 'API €2.40 / €10.00');
     assert.equal(view.usage.progress, 0.24);
+    assert.equal(view.usage.alert, false);
     assert.equal(view.batteryProgress, 0.72);
     assert.equal(view.batteryLabel, 'Battery 72 %');
   });
@@ -36,6 +37,19 @@ describe('status view', () => {
   it('caps the usage bar once the credit is spent', () => {
     const view = toStatusView(base, { monthCost: 13, monthlyCredit: 10, currency: 'EUR' }, NOW, en);
     assert.equal(view.usage?.progress, 1);
+  });
+
+  it('flags the API spend from 80 % of the credit', () => {
+    const at = (monthCost: number) =>
+      toStatusView(base, { monthCost, monthlyCredit: 10, currency: 'EUR' }, NOW, en).usage?.alert;
+    assert.equal(at(7.9), false);
+    assert.equal(at(8), true);
+  });
+
+  it('has no charging value when unplugged', () => {
+    const view = toStatusView({ ...base, pluggedIn: false, charging: null }, null, NOW, en);
+    assert.equal(view.chargingValue, null);
+    assert.equal(view.chargingDetail, null);
   });
 
   it('flags a sleeping vehicle', () => {
@@ -53,17 +67,26 @@ describe('status view', () => {
 describe('quick actions', () => {
   const all = new MockVehicleProvider().capabilities;
 
-  it('lists trunk, guard, charge port, climate, charging, in that order (lock is a state, not a button)', () => {
+  it('lists climate, trunk, guard, charge, in that order (lock is a state, not a button)', () => {
     const actions = toQuickActions(all, { ...base, climateOn: true, guardOn: true }, en);
     assert.deepEqual(
-      actions.map((a) => a.command),
-      ['trunk.rear', 'guard.off', 'chargePort.close', 'climate.off', 'charging.stop'],
+      actions.map((a) => a.key),
+      ['climate', 'trunk', 'guard', 'charge'],
     );
     assert.deepEqual(
       actions.filter((a) => a.active).map((a) => a.key),
-      ['guard', 'chargePort', 'climate', 'charging'],
+      ['climate', 'guard', 'charge'],
     );
     assert.equal(actions.find((a) => a.key === 'trunk')?.needsPin, true);
+  });
+
+  it('makes the charge button follow the cable', () => {
+    const charge = (status: Partial<VehicleStatus>) =>
+      toQuickActions(all, { ...base, ...status }, en).find((a) => a.key === 'charge');
+    assert.equal(charge({ pluggedIn: true, charging: { powerKw: 11, endsAt: null } })?.command, 'charging.stop');
+    assert.equal(charge({ pluggedIn: true, charging: null })?.command, 'charging.start');
+    assert.equal(charge({ pluggedIn: false, charging: null, chargePortOpen: true })?.command, 'chargePort.close');
+    assert.equal(charge({ pluggedIn: false, charging: null, chargePortOpen: false })?.command, 'chargePort.open');
   });
 
   it('hides commands the vehicle does not support', () => {
