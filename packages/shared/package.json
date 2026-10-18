@@ -1,0 +1,18 @@
+{
+  "name": "@gauss-hud/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vehicle-agnostic domain types, ports and use cases shared by the API and the HUD",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

@@ -8,7 +8,7 @@ Gauss HUD is compatible with Tesla vehicles through the official Fleet API. It i
 
 ## What it does
 
-**Vehicle status:** battery level, range, charging (power, estimated end), lock state, cabin temperature and climate, "updated X min ago" with an *asleep* / *offline* badge, and this month's estimated API cost.
+**Vehicle status:** battery level, range, charging (power, estimated end), lock state, cabin temperature and climate, "updated X min ago" with an _asleep_ / _offline_ badge, and this month's estimated API cost.
 
 **Manual commands:** climate on/off, start/stop charging, open/close the charge port, lock, and open the rear trunk (PIN-protected).
 
@@ -32,15 +32,33 @@ Gauss HUD is compatible with Tesla vehicles through the official Fleet API. It i
 
 > **Important: enable "PIN to Drive" on your vehicle.** The OAuth scope needed for commands technically allows unlocking and starting the car, whatever this project's whitelist says. PIN to Drive is your last line of defence if your server or tokens are ever compromised.
 
+## Development
+
+Requires Node.js 26 (see `.nvmrc`).
+
+```bash
+npm install
+npm run dev        # HUD on http://localhost:5173, running on an in-browser mock vehicle
+npm run lint && npm run typecheck && npm test && npm run build
+```
+
+Preview it at 600×600 with the [Meta Ray-Ban Display Simulator](https://chromewebstore.google.com/detail/jpjlmmodokemlepklkdbimceggpbjcll) Chrome extension. Use only the arrow keys and Enter, as on the glasses. The mock's development codes are printed in the browser console. Pick a scenario with `VITE_MOCK_SCENARIO` (`online`, `asleep`, `offline`, `driving`, `no_key`, `failing`) in `apps/web/.env`.
+
+Layout:
+
+- `packages/shared`: brand-neutral vehicle domain (status, command whitelist), the `VehicleProvider` port, the safety-critical use cases (`runCommand`, `refreshStatus`) and a mock vehicle. No framework, no vehicle-API specifics.
+- `apps/web/src/core`: HUD-agnostic state, view models, i18n (EN/FR) and the `HudClient` port.
+- `apps/web/src/hud/mrbd`: the Meta Ray-Ban Display front end, the only code that uses the Meta UI Toolkit. Supporting another display means adding a sibling folder.
+
 ## Roadmap
 
-| Phase | Content |
-|---|---|
-| 1 | Repository skeleton, full UI, API on mock data: pairing, PIN, journal, daily caps, cost counter, dry-run |
-| 2 | Onboarding scripts: key pair, public key hosting, partner registration (EU/NA), OAuth flow, pairing command |
-| 3 | Real vehicle data and signed commands, virtual key check, monthly token refresh, phone notifications |
-| 4 | Docker image, compose file, reverse proxy example, deployment guide, privacy policy template |
-| 5 | Optional: real-time telemetry |
+| Phase | Content                                                                                                     |
+| ----- | ----------------------------------------------------------------------------------------------------------- |
+| 1     | Repository skeleton, full UI, API on mock data: pairing, PIN, journal, daily caps, cost counter, dry-run    |
+| 2     | Onboarding scripts: key pair, public key hosting, partner registration (EU/NA), OAuth flow, pairing command |
+| 3     | Real vehicle data and signed commands, virtual key check, monthly token refresh, phone notifications        |
+| 4     | Docker image, compose file, reverse proxy example, deployment guide, privacy policy template                |
+| 5     | Optional: real-time telemetry                                                                               |
 
 ## Contributing
 

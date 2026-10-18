@@ -1,0 +1,22 @@
+/* Additive display: black renders as transparent on the glasses. Sized from the viewport, 600×600 is the target. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--uit-color-background-window, #000);
+  color: var(--uit-color-text-primary, #fff);
+}
+
+#hud {
+  inline-size: 100%;
+  block-size: 100%;
+}

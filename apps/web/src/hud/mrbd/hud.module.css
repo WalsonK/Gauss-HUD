@@ -1,0 +1,73 @@
+/* A pager page: leaves room for the tab bar at the top. */
+.page {
+  position: relative;
+  block-size: 100%;
+  padding: 68px 24px 12px;
+}
+
+.pageInner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  block-size: 100%;
+}
+
+/* Asleep / offline badge, aligned with the tab bar. */
+.badge {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hint {
+  display: flex;
+  justify-content: center;
+}
+
+/* Full-screen routes without a tab bar: pairing and PIN. */
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  block-size: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.wheel {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.wheelColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.wheelDigit {
+  min-inline-size: 1.2ch;
+  text-align: center;
+}
+
+.notice {
+  min-block-size: 1.5em;
+  color: var(--uit-color-accent-red, #ff6b6b);
+}

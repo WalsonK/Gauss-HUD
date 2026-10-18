@@ -1,0 +1,29 @@
+{
+  "name": "@gauss-hud/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HUD front end (Vite + React); display-specific code lives in src/hud/<display>",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "icon": "node scripts/gen-icon.mjs"
+  },
+  "dependencies": {
+    "@gauss-hud/shared": "*",
+    "@wearables-ui-toolkit/mrbd": "^129.23.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.4"
+  }
+}

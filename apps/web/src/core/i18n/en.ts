@@ -1,0 +1,78 @@
+import type { CommandOutcome, VehicleCommand } from '@gauss-hud/shared';
+
+export const en = {
+  pairing: {
+    title: 'Pairing code required',
+    hint: 'Generate a code on your server, then dial it in.',
+    validate: 'Pair',
+    checking: 'Checking…',
+    invalid: 'Wrong or expired code',
+    tooMany: 'Too many attempts, try again later',
+  },
+  wheel: {
+    increase: (position: number) => `Digit ${position}: increase`,
+    decrease: (position: number) => `Digit ${position}: decrease`,
+    digit: (position: number, value: number) => `Digit ${position}: ${value}`,
+  },
+  tabs: {
+    status: 'Status',
+    commands: 'Commands',
+    label: 'Vehicle screens',
+  },
+  status: {
+    battery: 'Battery',
+    range: 'Range',
+    charging: 'Charging',
+    notCharging: 'Not charging',
+    pluggedIn: 'Plugged in',
+    chargingEnds: (end: string) => `Until ${end}`,
+    locked: 'Locked',
+    unlocked: 'Unlocked',
+    cabin: 'Cabin',
+    climateOn: 'Climate on',
+    climateOff: 'Climate off',
+    updatedJustNow: 'Updated just now',
+    updatedMinutes: (minutes: number) => `Updated ${minutes} min ago`,
+    updatedHours: (hours: number) => `Updated ${hours} h ago`,
+    asleep: 'Asleep',
+    offline: 'Offline',
+    cost: (cost: string, credit: string) => `API this month: ${cost} of ${credit}`,
+    refreshHint: '↵ Refresh',
+    refreshing: 'Refreshing…',
+    noData: 'No data yet',
+    ariaLabel: 'Vehicle status, press Enter to refresh',
+  },
+  commands: {
+    'climate.on': 'Turn climate on',
+    'climate.off': 'Turn climate off',
+    'charging.start': 'Start charging',
+    'charging.stop': 'Stop charging',
+    'chargePort.open': 'Open charge port',
+    'chargePort.close': 'Close charge port',
+    lock: 'Lock',
+    'trunk.rear': 'Rear trunk',
+  } satisfies Record<VehicleCommand, string>,
+  commandHints: {
+    pinRequired: 'PIN required · opens or closes',
+    sending: 'Sending…',
+    waking: 'Waking up the car…',
+    busy: 'Another command is running',
+  },
+  outcome: {
+    ok: 'Done',
+    failed: 'Failed',
+    moving: 'Refused: vehicle in gear',
+    offline: 'Vehicle offline',
+    timeout: 'No answer: check the status',
+    no_key: 'Key not installed on the vehicle',
+    wrong_pin: 'Wrong PIN',
+    pin_locked: 'PIN locked for 15 min',
+    cap_reached: 'Daily limit reached',
+  } satisfies Record<CommandOutcome, string>,
+  pin: {
+    title: 'PIN',
+    validate: 'Confirm',
+  },
+};
+
+export type Messages = typeof en;
