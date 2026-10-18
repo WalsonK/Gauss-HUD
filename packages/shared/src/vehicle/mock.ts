@@ -58,6 +58,7 @@ export class MockVehicleProvider implements VehicleProvider {
       locked: true,
       cabinTempC: 19.5,
       climateOn: false,
+      guardOn: false,
       moving: scenario === 'driving',
     };
   }
@@ -128,6 +129,10 @@ export class MockVehicleProvider implements VehicleProvider {
         return { locked: true };
       case 'trunk.rear':
         return {};
+      case 'guard.on':
+        return { guardOn: true };
+      case 'guard.off':
+        return { guardOn: false };
     }
   }
 }

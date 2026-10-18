@@ -14,10 +14,9 @@ export const fr: Messages = {
     decrease: (position) => `Chiffre ${position} : diminuer`,
     digit: (position, value) => `Chiffre ${position} : ${value}`,
   },
-  tabs: {
-    status: 'État',
-    commands: 'Commandes',
-    label: 'Écrans du véhicule',
+  home: {
+    label: 'Véhicule',
+    actions: 'Commandes du véhicule',
   },
   status: {
     battery: 'Batterie',
@@ -36,11 +35,11 @@ export const fr: Messages = {
     updatedHours: (hours) => `Mis à jour il y a ${hours} h`,
     asleep: 'Endormie',
     offline: 'Hors ligne',
-    cost: (cost, credit) => `API ce mois : ${cost} sur ${credit}`,
-    refreshHint: '↵ Actualiser',
+    batteryLevel: (percent) => `Batterie ${percent}`,
+    usage: (cost, credit) => `API ${cost} / ${credit}`,
+    usageLabel: (cost, credit) => `Dépense API du mois : ${cost} sur ${credit} de crédit`,
     refreshing: 'Actualisation…',
     noData: 'Pas encore de données',
-    ariaLabel: 'État du véhicule, Entrée pour actualiser',
   },
   commands: {
     'climate.on': 'Allumer la clim',
@@ -51,12 +50,15 @@ export const fr: Messages = {
     'chargePort.close': 'Fermer la trappe',
     lock: 'Verrouiller',
     'trunk.rear': 'Coffre arrière',
+    'guard.on': 'Activer la surveillance',
+    'guard.off': 'Désactiver la surveillance',
   },
   commandHints: {
-    pinRequired: 'PIN requis · ouvre ou ferme',
+    pinRequired: 'Coffre arrière (PIN)',
     sending: 'Envoi…',
     waking: 'Réveil de la voiture…',
     busy: 'Une autre commande est en cours',
+    alreadyLocked: 'Déjà verrouillée',
   },
   outcome: {
     ok: 'OK',

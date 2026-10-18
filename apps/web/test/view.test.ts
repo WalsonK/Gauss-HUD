@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { MockVehicleProvider, type VehicleStatus } from '@gauss-hud/shared';
 import { createI18n, pickLocale } from '../src/core/i18n/index.ts';
-import { toCommandRows } from '../src/core/view/commands.ts';
+import { toQuickActions } from '../src/core/view/commands.ts';
 import { formatUpdated, toStatusView } from '../src/core/view/status.ts';
 
 const en = createI18n('en');
@@ -27,7 +27,15 @@ describe('status view', () => {
     assert.equal(view.chargingValue, '11 kW');
     assert.match(view.chargingDetail ?? '', /^Until \d{2}:\d{2}/);
     assert.equal(view.badge, null);
-    assert.equal(view.cost, 'API this month: €2.40 of €10.00');
+    assert.equal(view.usage?.text, 'API €2.40 / €10.00');
+    assert.equal(view.usage.progress, 0.24);
+    assert.equal(view.batteryProgress, 0.72);
+    assert.equal(view.batteryLabel, 'Battery 72 %');
+  });
+
+  it('caps the usage bar once the credit is spent', () => {
+    const view = toStatusView(base, { monthCost: 13, monthlyCredit: 10, currency: 'EUR' }, NOW, en);
+    assert.equal(view.usage?.progress, 1);
   });
 
   it('flags a sleeping vehicle', () => {
@@ -42,21 +50,36 @@ describe('status view', () => {
   });
 });
 
-describe('command rows', () => {
-  it('offers the command that fits the current state', () => {
-    const rows = toCommandRows(new MockVehicleProvider().capabilities, { ...base, climateOn: true }, en);
+describe('quick actions', () => {
+  const all = new MockVehicleProvider().capabilities;
+
+  it('lists lock, trunk, guard, charge port, climate, charging, in that order', () => {
+    const actions = toQuickActions(all, { ...base, climateOn: true, guardOn: true }, en);
     assert.deepEqual(
-      rows.map((r) => r.command),
-      ['climate.off', 'charging.stop', 'chargePort.close', 'lock', 'trunk.rear'],
+      actions.map((a) => a.command),
+      ['lock', 'trunk.rear', 'guard.off', 'chargePort.close', 'climate.off', 'charging.stop'],
     );
-    assert.equal(rows.find((r) => r.key === 'trunk')?.needsPin, true);
+    assert.deepEqual(
+      actions.filter((a) => a.active).map((a) => a.key),
+      ['guard', 'chargePort', 'climate', 'charging'],
+    );
+    assert.equal(actions.find((a) => a.key === 'trunk')?.needsPin, true);
+  });
+
+  it('marks the lock as done when already locked, and never offers to unlock', () => {
+    const locked = toQuickActions(all, base, fr).find((a) => a.key === 'lock');
+    assert.equal(locked?.done, true);
+    assert.equal(locked.label, 'Verrouillée');
+    const unlocked = toQuickActions(all, { ...base, locked: false }, en).find((a) => a.key === 'lock');
+    assert.equal(unlocked?.done, false);
+    assert.equal(unlocked.command, 'lock');
   });
 
   it('hides commands the vehicle does not support', () => {
-    const rows = toCommandRows(['lock', 'climate.on', 'climate.off'], base, en);
+    const actions = toQuickActions(['lock', 'climate.on', 'climate.off'], base, en);
     assert.deepEqual(
-      rows.map((r) => r.key),
-      ['climate', 'lock'],
+      actions.map((a) => a.key),
+      ['lock', 'climate'],
     );
   });
 });

@@ -14,10 +14,9 @@ export const en = {
     decrease: (position: number) => `Digit ${position}: decrease`,
     digit: (position: number, value: number) => `Digit ${position}: ${value}`,
   },
-  tabs: {
-    status: 'Status',
-    commands: 'Commands',
-    label: 'Vehicle screens',
+  home: {
+    label: 'Vehicle',
+    actions: 'Vehicle commands',
   },
   status: {
     battery: 'Battery',
@@ -36,11 +35,11 @@ export const en = {
     updatedHours: (hours: number) => `Updated ${hours} h ago`,
     asleep: 'Asleep',
     offline: 'Offline',
-    cost: (cost: string, credit: string) => `API this month: ${cost} of ${credit}`,
-    refreshHint: '↵ Refresh',
+    batteryLevel: (percent: string) => `Battery ${percent}`,
+    usage: (cost: string, credit: string) => `API ${cost} / ${credit}`,
+    usageLabel: (cost: string, credit: string) => `Vehicle API spend this month: ${cost} of ${credit} credit`,
     refreshing: 'Refreshing…',
     noData: 'No data yet',
-    ariaLabel: 'Vehicle status, press Enter to refresh',
   },
   commands: {
     'climate.on': 'Turn climate on',
@@ -51,12 +50,15 @@ export const en = {
     'chargePort.close': 'Close charge port',
     lock: 'Lock',
     'trunk.rear': 'Rear trunk',
+    'guard.on': 'Turn guard mode on',
+    'guard.off': 'Turn guard mode off',
   } satisfies Record<VehicleCommand, string>,
   commandHints: {
-    pinRequired: 'PIN required · opens or closes',
+    pinRequired: 'Rear trunk (PIN)',
     sending: 'Sending…',
     waking: 'Waking up the car…',
     busy: 'Another command is running',
+    alreadyLocked: 'Already locked',
   },
   outcome: {
     ok: 'Done',

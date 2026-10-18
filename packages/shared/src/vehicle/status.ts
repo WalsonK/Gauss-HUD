@@ -28,6 +28,8 @@ export const VehicleStatusSchema = z.object({
   locked: z.boolean(),
   cabinTempC: z.number().nullable(),
   climateOn: z.boolean(),
+  /** Guard mode: the parked vehicle watches and records its surroundings. */
+  guardOn: z.boolean(),
   /** True when the vehicle is in gear (drive, reverse or neutral); commands are refused. */
   moving: z.boolean(),
 });

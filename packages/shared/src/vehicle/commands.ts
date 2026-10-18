@@ -14,6 +14,8 @@ export const VEHICLE_COMMANDS = [
   'chargePort.close',
   'lock',
   'trunk.rear',
+  'guard.on',
+  'guard.off',
 ] as const;
 
 export const VehicleCommandSchema = z.enum(VEHICLE_COMMANDS);
@@ -35,6 +37,8 @@ export const COMMAND_INFO: Readonly<Record<VehicleCommand, CommandInfo>> = {
   'chargePort.close': { needsPin: false, toggle: false },
   lock: { needsPin: false, toggle: false },
   'trunk.rear': { needsPin: true, toggle: true },
+  'guard.on': { needsPin: false, toggle: false },
+  'guard.off': { needsPin: false, toggle: false },
 };
 
 /** Final result of a command request, as shown to the wearer. */

@@ -52,6 +52,14 @@ describe('runCommand', () => {
     assert.deepEqual(progress, [{ phase: 'sending' }, { phase: 'done', outcome: 'ok' }]);
   });
 
+  it('turns guard mode on and off', async () => {
+    const provider = new MockVehicleProvider({ latencyMs: 0 });
+    assert.equal(await runCommand(provider, 'guard.on'), 'ok');
+    assert.equal((await provider.readStatus()).guardOn, true);
+    assert.equal(await runCommand(provider, 'guard.off'), 'ok');
+    assert.equal((await provider.readStatus()).guardOn, false);
+  });
+
   it('refuses when the vehicle is moving, without sending anything', async () => {
     const { provider, calls } = spyProvider('driving');
     assert.equal(await runCommand(provider, 'trunk.rear'), 'moving');

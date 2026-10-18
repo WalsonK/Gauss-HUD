@@ -1,40 +1,62 @@
-/* A pager page: leaves room for the tab bar at the top. */
-.page {
-  position: relative;
-  block-size: 100%;
-  padding: 68px 24px 12px;
-}
-
-.pageInner {
-  display: flex;
-  flex-direction: column;
+/* Single home screen: credit strip / vehicle at a glance / status line / quick actions. */
+.home {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  /* Without this, the button rail's intrinsic width widens the column past the screen. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   block-size: 100%;
+  padding: 24px 24px 20px;
 }
 
-/* Asleep / offline badge, aligned with the tab bar. */
-.badge {
-  position: absolute;
-  top: 20px;
-  right: 24px;
+.usage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.grid2 {
+.usageRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 32px;
+}
+
+.glance {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 16px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
 }
 
-.footer {
-  margin-top: auto;
+.side {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
-.hint {
-  display: flex;
-  justify-content: center;
+.sideEnd {
+  align-items: flex-end;
+  text-align: end;
+}
+
+.ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.ringIcon {
+  position: absolute;
+  inline-size: 88px;
+  block-size: 88px;
+  color: var(--uit-color-text-primary, #fff);
+}
+
+.statusLine {
+  text-align: center;
 }
 
 /* Full-screen routes without a tab bar: pairing and PIN. */

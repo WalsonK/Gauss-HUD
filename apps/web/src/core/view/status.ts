@@ -3,6 +3,10 @@ import type { I18n } from '../i18n/index.ts';
 
 /** Display-ready strings for the status screen; any HUD can lay them out its own way. */
 export interface StatusView {
+  /** Battery level from 0 to 1, for a gauge. */
+  readonly batteryProgress: number;
+  /** Spoken battery level, e.g. "Battery 72 %". */
+  readonly batteryLabel: string;
   readonly battery: string;
   readonly range: string;
   /** "Charging" / "Not charging". */
@@ -16,7 +20,8 @@ export interface StatusView {
   readonly updated: string;
   /** Asleep or offline: the figures come from the last read. */
   readonly badge: string | null;
-  readonly cost: string | null;
+  /** API spend vs monthly credit: short text, spoken label and fill from 0 to 1. */
+  readonly usage: { readonly text: string; readonly label: string; readonly progress: number } | null;
 }
 
 export function formatUpdated(updatedAt: string, now: number, { t }: I18n): string {
@@ -41,8 +46,22 @@ export function toStatusView(status: VehicleStatus, usage: UsageSummary | null, 
   else if (status.pluggedIn) chargingValue = t.status.pluggedIn;
   const chargingDetail = charging?.endsAt ? t.status.chargingEnds(time(charging.endsAt)) : null;
 
+  const battery = `${number(status.batteryPercent)} %`;
+  let usageView: StatusView['usage'] = null;
+  if (usage) {
+    const cost = money(usage.monthCost, usage.currency);
+    const credit = money(usage.monthlyCredit, usage.currency);
+    usageView = {
+      text: t.status.usage(cost, credit),
+      label: t.status.usageLabel(cost, credit),
+      progress: usage.monthlyCredit > 0 ? Math.min(1, usage.monthCost / usage.monthlyCredit) : 1,
+    };
+  }
+
   return {
-    battery: `${number(status.batteryPercent)} %`,
+    batteryProgress: status.batteryPercent / 100,
+    batteryLabel: t.status.batteryLevel(battery),
+    battery,
     range: `${number(status.rangeKm)} km`,
     charging: charging ? t.status.charging : t.status.notCharging,
     chargingValue,
@@ -52,6 +71,6 @@ export function toStatusView(status: VehicleStatus, usage: UsageSummary | null, 
     climate: status.climateOn ? t.status.climateOn : t.status.climateOff,
     updated: formatUpdated(status.updatedAt, now, i18n),
     badge: status.connection === 'asleep' ? t.status.asleep : status.connection === 'offline' ? t.status.offline : null,
-    cost: usage && t.status.cost(money(usage.monthCost, usage.currency), money(usage.monthlyCredit, usage.currency)),
+    usage: usageView,
   };
 }

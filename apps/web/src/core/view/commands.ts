@@ -1,33 +1,50 @@
 import { COMMAND_INFO, type VehicleCommand, type VehicleStatus } from '@gauss-hud/shared';
 import type { I18n } from '../i18n/index.ts';
 
-export type CommandRowKey = 'climate' | 'charging' | 'chargePort' | 'lock' | 'trunk';
+export type QuickActionKey = 'lock' | 'trunk' | 'guard' | 'chargePort' | 'climate' | 'charging';
 
-export interface CommandRow {
-  /** Stable identity of the row, whichever command it currently offers. */
-  readonly key: CommandRowKey;
+export interface QuickAction {
+  /** Stable identity of the button, whichever command it currently sends. */
+  readonly key: QuickActionKey;
   readonly command: VehicleCommand;
+  /** What Enter does, or the current state when there is nothing to do. */
   readonly label: string;
+  /** The function is on (guard mode, port open, climate, charging). */
+  readonly active: boolean;
+  /** Nothing to do: the vehicle is already locked (unlocking is out of scope). */
+  readonly done: boolean;
   readonly needsPin: boolean;
 }
 
 /**
- * One row per action, offering the command that makes sense for the current state (climate on →
- * "turn off"). Rows whose command the vehicle doesn't support are left out.
+ * The quick-action buttons, left to right, each offering the command that fits the current state
+ * (climate on → turn off). Buttons whose command the vehicle doesn't support are left out.
  */
-export function toCommandRows(
+export function toQuickActions(
   capabilities: readonly VehicleCommand[],
   status: VehicleStatus | null,
   { t }: I18n,
-): CommandRow[] {
-  const candidates: [CommandRowKey, VehicleCommand][] = [
-    ['climate', status?.climateOn ? 'climate.off' : 'climate.on'],
-    ['charging', status?.charging ? 'charging.stop' : 'charging.start'],
-    ['chargePort', status?.chargePortOpen ? 'chargePort.close' : 'chargePort.open'],
-    ['lock', 'lock'],
-    ['trunk', 'trunk.rear'],
+): QuickAction[] {
+  const locked = status?.locked ?? false;
+  const candidates: [QuickActionKey, VehicleCommand, boolean][] = [
+    ['lock', 'lock', false],
+    ['trunk', 'trunk.rear', false],
+    ['guard', status?.guardOn ? 'guard.off' : 'guard.on', status?.guardOn ?? false],
+    ['chargePort', status?.chargePortOpen ? 'chargePort.close' : 'chargePort.open', status?.chargePortOpen ?? false],
+    ['climate', status?.climateOn ? 'climate.off' : 'climate.on', status?.climateOn ?? false],
+    ['charging', status?.charging ? 'charging.stop' : 'charging.start', Boolean(status?.charging)],
   ];
   return candidates
     .filter(([, command]) => capabilities.includes(command))
-    .map(([key, command]) => ({ key, command, label: t.commands[command], needsPin: COMMAND_INFO[command].needsPin }));
+    .map(([key, command, active]) => {
+      const done = key === 'lock' && locked;
+      return {
+        key,
+        command,
+        label: done ? t.status.locked : t.commands[command],
+        active,
+        done,
+        needsPin: COMMAND_INFO[command].needsPin,
+      };
+    });
 }
