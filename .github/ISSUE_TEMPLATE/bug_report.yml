@@ -1,0 +1,69 @@
+name: Bug report
+description: Something does not work as expected.
+labels: [bug]
+body:
+  - type: checkboxes
+    id: no-secrets
+    attributes:
+      label: Before you post
+      options:
+        - label: This is not a security vulnerability (those go through SECURITY.md, privately).
+          required: true
+        - label: I removed every secret from this report (tokens, keys, session cookies, pairing codes, PINs, VINs).
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the HUD
+        2. Go to Commands
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: e.g. main @ abc1234
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where does it happen?
+      multiple: true
+      options:
+        - Desktop browser
+        - Meta Ray-Ban Display Simulator (Chrome extension)
+        - Meta Ray-Ban Display glasses
+        - Server / API
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Vehicle mode
+      options:
+        - Mock data
+        - Dry-run
+        - Real vehicle
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (redacted)
+      description: Relevant server or browser console output, with secrets removed.
+      render: text

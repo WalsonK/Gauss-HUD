@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an improvement or a new feature.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What problem does it solve?
+      description: Describe the need, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: Impact on vehicle API usage
+      description: Does it add data reads, wake-ups or commands? How often?
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      description: See the "Non-negotiable rules" in CONTRIBUTING.md.
+      options:
+        - label: It does not involve unlocking, remote start, location, or automated/scheduled commands.
+          required: true
+        - label: It does not require polling or background calls to the vehicle API.
+          required: true

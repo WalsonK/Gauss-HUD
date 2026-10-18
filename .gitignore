@@ -147,3 +147,14 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Project secrets & data (never commit keys, tokens, databases)
+*.pem
+*.key
+*.p12
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+data/
+secrets/

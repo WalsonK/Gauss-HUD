@@ -1,0 +1,21 @@
+Gauss HUD
+Copyright 2026 The Gauss HUD contributors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Trademarks
+----------
+Tesla is a trademark of Tesla, Inc. This project is not affiliated with,
+endorsed by, or sponsored by Tesla, Inc. The name is used only to state
+compatibility with vehicles reachable through the official Fleet API.
+
+Meta and Ray-Ban are trademarks of their respective owners. This project is
+not affiliated with, endorsed by, or sponsored by Meta Platforms, Inc. or
+EssilorLuxottica.
+
+Third-party components
+----------------------
+The Meta UI Toolkit for Meta Ray-Ban Display, its icons and its fonts, as well
+as the official vehicle command proxy image, are consumed as external
+dependencies (npm packages, container images). They are not redistributed in
+this repository and remain subject to their own licenses and terms.
