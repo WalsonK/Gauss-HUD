@@ -43,6 +43,7 @@ const EnvSchema = z.object({
   TESLA_PRIVATE_KEY_PATH: z.string().default('secrets/private-key.pem'),
   TESLA_COMMAND_PROXY_URL: z.url({ protocol: /^https$/ }).optional(),
   TESLA_PROXY_CA_PATH: z.string().optional(),
+  TESLA_PROXY_TLS_KEY_PATH: z.string().default('secrets/proxy-tls/tls-key.pem'),
 
   NTFY_URL: z.url().optional(),
   NTFY_TOPIC: z.string().optional(),
@@ -65,7 +66,7 @@ export interface TeslaConfig {
   readonly clientId: string;
   readonly clientSecret: string;
   readonly fleetApiUrl: string;
-  /** Unset until chosen with `npm run tesla:vehicles`. */
+  /** Unset until chosen with `tesla:vehicles`. */
   readonly vin: string | undefined;
   readonly publicKeyPath: string;
   /** The signing proxy (tesla-http-proxy); commands need it, reads don't. */
@@ -92,6 +93,8 @@ export interface Config {
   readonly mockScenario: z.infer<typeof EnvSchema>['MOCK_SCENARIO'];
   /** Key pair for signed commands; generated before the application even exists. */
   readonly teslaKeys: { readonly publicKeyPath: string; readonly privateKeyPath: string };
+  /** Where `tesla:proxy-cert` writes the signing proxy's TLS pair, and the URL the app reaches it at. */
+  readonly proxyTls: { readonly keyPath: string; readonly certPath: string; readonly url: string | undefined };
   /** Null while the vehicle API application is not set up: the server then runs on the mock. */
   readonly tesla: TeslaConfig | null;
   readonly ntfy: NtfyConfig | null;
@@ -125,6 +128,11 @@ export function parseConfig(env: Record<string, string | undefined> = process.en
     teslaKeys: {
       publicKeyPath: fromRoot(e.TESLA_PUBLIC_KEY_PATH),
       privateKeyPath: fromRoot(e.TESLA_PRIVATE_KEY_PATH),
+    },
+    proxyTls: {
+      keyPath: fromRoot(e.TESLA_PROXY_TLS_KEY_PATH),
+      certPath: fromRoot(e.TESLA_PROXY_CA_PATH ?? 'secrets/proxy-tls/tls-cert.pem'),
+      url: e.TESLA_COMMAND_PROXY_URL?.replace(/\/+$/, ''),
     },
     tesla:
       e.TESLA_CLIENT_ID && e.TESLA_CLIENT_SECRET

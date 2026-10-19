@@ -14,6 +14,7 @@
     "sessions:revoke": "node src/cli.ts sessions:revoke",
     "pin:set": "node src/cli.ts pin:set",
     "tesla:keys": "node src/cli.ts tesla:keys",
+    "tesla:proxy-cert": "node src/cli.ts tesla:proxy-cert",
     "tesla:register": "node src/cli.ts tesla:register",
     "tesla:login": "node src/cli.ts tesla:login",
     "tesla:vehicles": "node src/cli.ts tesla:vehicles",

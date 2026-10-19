@@ -50,6 +50,11 @@ describe('API routes', () => {
     assert.deepEqual((await app.inject({ method: 'GET', url: '/api/session' })).json(), { paired: false });
   });
 
+  it('answers the healthcheck without a session', async () => {
+    const app = await buildApp(testContext());
+    assert.deepEqual((await app.inject({ method: 'GET', url: '/api/health' })).json(), { ok: true });
+  });
+
   it('refuses any command outside the whitelist', async () => {
     const { app, cookies } = await pairedApp();
     for (const command of ['unlock', 'door_unlock', 'remote_start_drive', '__proto__']) {

@@ -50,7 +50,7 @@ export function createContext(config: Config, { log, now = Date.now, provider, f
   const usage = new Usage(db, { timeZone: config.timeZone, monthlyCredit: config.monthlyCreditEur }, now);
 
   const tesla = config.tesla && createTesla(config, config.tesla, { kv, usage, log, now, fetch });
-  if (tesla && !tesla.provider) log.warn('TESLA_VIN is not set: running on the mock (see `npm run tesla:vehicles`)');
+  if (tesla && !tesla.provider) log.warn('TESLA_VIN is not set: running on the mock (see `tesla:vehicles`)');
 
   // The vehicle API adapter meters its own HTTP calls; the mock is metered per method.
   const source = provider ? 'test' : tesla?.provider ? 'tesla' : 'mock';
