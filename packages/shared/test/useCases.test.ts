@@ -19,7 +19,7 @@ function spyProvider(scenario: MockScenario, wakeDelayMs = 0) {
     readStatus: () => (calls.push('readStatus'), inner.readStatus()),
     wake: (ms) => (calls.push('wake'), inner.wake(ms)),
     hasKey: () => (calls.push('hasKey'), inner.hasKey()),
-    execute: (cmd) => (calls.push(`execute:${cmd}`), inner.execute(cmd)),
+    execute: (cmd, value) => (calls.push(`execute:${cmd}`), inner.execute(cmd, value)),
   };
   return { provider, calls };
 }
@@ -52,6 +52,14 @@ describe('runCommand', () => {
     assert.deepEqual(progress, [{ phase: 'sending' }, { phase: 'done', outcome: 'ok' }]);
   });
 
+  it('turns guard mode on and off', async () => {
+    const provider = new MockVehicleProvider({ latencyMs: 0 });
+    assert.equal(await runCommand(provider, 'guard.on'), 'ok');
+    assert.equal((await provider.readStatus()).guardOn, true);
+    assert.equal(await runCommand(provider, 'guard.off'), 'ok');
+    assert.equal((await provider.readStatus()).guardOn, false);
+  });
+
   it('refuses when the vehicle is moving, without sending anything', async () => {
     const { provider, calls } = spyProvider('driving');
     assert.equal(await runCommand(provider, 'trunk.rear'), 'moving');
@@ -82,6 +90,24 @@ describe('runCommand', () => {
   it('refuses a command outside the vehicle capabilities', async () => {
     const provider = new MockVehicleProvider({ latencyMs: 0, capabilities: ['lock'] });
     assert.equal(await runCommand(provider, 'trunk.rear'), 'failed');
+  });
+
+  it('sets the target temperature within range, in half degrees', async () => {
+    const { provider } = spyProvider('online');
+    assert.equal(await runCommand(provider, 'climate.setTemp', { value: 22.5 }), 'ok');
+    assert.equal((await provider.readStatus()).targetTempC, 22.5);
+  });
+
+  it('refuses a missing, out-of-range or off-step value without sending anything', async () => {
+    for (const value of [undefined, 15.5, 28.5, 21.3, Number.NaN]) {
+      const { provider, calls } = spyProvider('online');
+      assert.equal(await runCommand(provider, 'climate.setTemp', { value }), 'failed');
+      assert.ok(!calls.some((c) => c.startsWith('execute')));
+    }
+  });
+
+  it('refuses a value on a command that takes none', async () => {
+    assert.equal(await runCommand(spyProvider('online').provider, 'climate.on', { value: 21 }), 'failed');
   });
 
   it('sends a failing command once', async () => {

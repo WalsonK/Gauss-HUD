@@ -21,7 +21,7 @@ export function PinScreen() {
 
   const submit = async (pin: string) => {
     setNotice(null);
-    const outcome = await send(command, pin);
+    const outcome = await send(command, { pin });
     if (outcome === 'wrong_pin') {
       setNotice(t.outcome.wrong_pin);
       setAttempt((n) => n + 1);

@@ -11,6 +11,8 @@ export type PairResult = 'ok' | 'invalid' | 'too_many';
 
 export interface SendOptions {
   readonly pin?: string;
+  /** For commands that carry one (`COMMAND_VALUES`), e.g. the target temperature. */
+  readonly value?: number;
   readonly onProgress?: (progress: CommandProgress) => void;
 }
 

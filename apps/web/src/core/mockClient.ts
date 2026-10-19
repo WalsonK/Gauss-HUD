@@ -77,7 +77,7 @@ export class MockHudClient implements HudClient {
     return this.snapshot();
   }
 
-  async send(command: VehicleCommand, { pin, onProgress }: SendOptions = {}): Promise<CommandOutcome> {
+  async send(command: VehicleCommand, { pin, value, onProgress }: SendOptions = {}): Promise<CommandOutcome> {
     const refuse = (outcome: CommandOutcome) => {
       onProgress?.({ phase: 'done', outcome });
       return outcome;
@@ -86,7 +86,7 @@ export class MockHudClient implements HudClient {
       const pinOutcome = this.#checkPin(pin);
       if (pinOutcome) return refuse(pinOutcome);
     }
-    const outcome = await runCommand(this.#vehicle, command, { onProgress });
+    const outcome = await runCommand(this.#vehicle, command, { value, onProgress });
     // Show the effect right away, as the server would after re-reading the vehicle.
     if (outcome === 'ok' || outcome === 'timeout') this.#status = await refreshStatus(this.#vehicle, this.#status);
     return outcome;

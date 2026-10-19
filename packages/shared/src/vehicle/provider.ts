@@ -19,6 +19,6 @@ export interface VehicleProvider {
   wake(timeoutMs: number): Promise<boolean>;
   /** Whether this app's key is installed on the vehicle (needed for signed commands). */
   hasKey(): Promise<boolean>;
-  /** Sends one command, once. */
-  execute(command: VehicleCommand): Promise<ExecuteResult>;
+  /** Sends one command, once, with its value when it takes one (already validated). */
+  execute(command: VehicleCommand, value?: number): Promise<ExecuteResult>;
 }

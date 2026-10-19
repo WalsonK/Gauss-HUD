@@ -1,40 +1,87 @@
-/* A pager page: leaves room for the tab bar at the top. */
-.page {
-  position: relative;
-  block-size: 100%;
-  padding: 68px 24px 12px;
-}
-
-.pageInner {
+/* Single home screen: vehicle name / one row per function (state | button) / footer. */
+.home {
   display: flex;
   flex-direction: column;
   gap: 12px;
   block-size: 100%;
+  padding: 20px 24px;
 }
 
-/* Asleep / offline badge, aligned with the tab bar. */
-.badge {
-  position: absolute;
-  top: 20px;
-  right: 24px;
+.name {
+  min-block-size: 1lh;
+  text-align: center;
 }
 
-.grid2 {
+/* The rows take the free space and sit in its middle. */
+.panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  min-block-size: 0;
+}
+
+.row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
 }
 
-.footer {
-  margin-top: auto;
+.state {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
-.hint {
+.stateFill {
+  margin-block: 4px;
+}
+
+/* Lock state and data age (or command progress), then API spend. */
+.footer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.spend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.spendTrack {
+  flex: 1;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--uit-color-background-track, #ffffff40);
+}
+
+/* At least as wide as the amount it carries, so a small spend stays readable. */
+.spendFill {
+  box-sizing: border-box;
+  min-inline-size: max-content;
+  max-inline-size: 100%;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--uit-color-control-active, #ffffffbf);
+  color: var(--uit-color-icon-inverse, #000);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.spendAlert {
+  background: var(--uit-color-persistent-caution, #eb6e00);
 }
 
 /* Full-screen routes without a tab bar: pairing and PIN. */

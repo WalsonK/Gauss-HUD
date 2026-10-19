@@ -16,6 +16,8 @@ export type ChargingStatus = z.infer<typeof ChargingStatusSchema>;
  * shape; nothing above the adapter layer knows which vehicle API produced it.
  */
 export const VehicleStatusSchema = z.object({
+  /** The name the owner gave the vehicle, when the vehicle API reports one. */
+  name: z.string().nullable(),
   connection: ConnectionStateSchema,
   /** When the vehicle data was last read (not when the connection state was checked). */
   updatedAt: z.iso.datetime(),
@@ -27,7 +29,11 @@ export const VehicleStatusSchema = z.object({
   chargePortOpen: z.boolean(),
   locked: z.boolean(),
   cabinTempC: z.number().nullable(),
+  /** Climate target temperature, °C. */
+  targetTempC: z.number().nullable(),
   climateOn: z.boolean(),
+  /** Guard mode: the parked vehicle watches and records its surroundings. */
+  guardOn: z.boolean(),
   /** True when the vehicle is in gear (drive, reverse or neutral); commands are refused. */
   moving: z.boolean(),
 });

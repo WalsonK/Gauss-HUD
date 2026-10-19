@@ -8,12 +8,15 @@ import { z } from 'zod';
 export const VEHICLE_COMMANDS = [
   'climate.on',
   'climate.off',
+  'climate.setTemp',
   'charging.start',
   'charging.stop',
   'chargePort.open',
   'chargePort.close',
   'lock',
   'trunk.rear',
+  'guard.on',
+  'guard.off',
 ] as const;
 
 export const VehicleCommandSchema = z.enum(VEHICLE_COMMANDS);
@@ -29,13 +32,37 @@ export interface CommandInfo {
 export const COMMAND_INFO: Readonly<Record<VehicleCommand, CommandInfo>> = {
   'climate.on': { needsPin: false, toggle: false },
   'climate.off': { needsPin: false, toggle: false },
+  'climate.setTemp': { needsPin: false, toggle: false },
   'charging.start': { needsPin: false, toggle: false },
   'charging.stop': { needsPin: false, toggle: false },
   'chargePort.open': { needsPin: false, toggle: false },
   'chargePort.close': { needsPin: false, toggle: false },
   lock: { needsPin: false, toggle: false },
   'trunk.rear': { needsPin: true, toggle: true },
+  'guard.on': { needsPin: false, toggle: false },
+  'guard.off': { needsPin: false, toggle: false },
 };
+
+export interface ValueRange {
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+}
+
+/** Commands that carry a value, with the values accepted. Every other command takes none. */
+export const COMMAND_VALUES: Readonly<Partial<Record<VehicleCommand, ValueRange>>> = {
+  /** Cabin target temperature, °C. */
+  'climate.setTemp': { min: 16, max: 28, step: 0.5 },
+};
+
+/** Whether `value` fits `command`: none for a plain command, a step within range otherwise. */
+export function isValidCommandValue(command: VehicleCommand, value: number | undefined): boolean {
+  const range = COMMAND_VALUES[command];
+  if (!range) return value === undefined;
+  if (value === undefined || !Number.isFinite(value) || value < range.min || value > range.max) return false;
+  const steps = (value - range.min) / range.step;
+  return Math.abs(steps - Math.round(steps)) < 1e-9;
+}
 
 /** Final result of a command request, as shown to the wearer. */
 export const CommandOutcomeSchema = z.enum([
