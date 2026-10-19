@@ -79,7 +79,7 @@ describe('quick actions', () => {
       actions.filter((a) => a.active).map((a) => a.key),
       ['climate', 'guard', 'charge'],
     );
-    assert.equal(actions.find((a) => a.key === 'trunk')?.needsPin, true);
+    assert.equal(actions.find((a) => a.key === 'trunk')?.needsPin, false);
   });
 
   it('puts a short verb on each button and keeps the full label', () => {

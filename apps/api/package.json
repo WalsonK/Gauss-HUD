@@ -1,0 +1,33 @@
+{
+  "name": "@gauss-hud/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Fastify API: pairing, PIN, journal, daily caps, cost counter and the vehicle adapters; also serves the compiled HUD",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/main.ts",
+    "start": "node src/main.ts",
+    "typecheck": "tsc",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "pair": "node src/cli.ts pair",
+    "sessions:revoke": "node src/cli.ts sessions:revoke",
+    "pin:set": "node src/cli.ts pin:set",
+    "tesla:keys": "node src/cli.ts tesla:keys",
+    "tesla:register": "node src/cli.ts tesla:register",
+    "tesla:login": "node src/cli.ts tesla:login",
+    "tesla:vehicles": "node src/cli.ts tesla:vehicles",
+    "tesla:pair-link": "node src/cli.ts tesla:pair-link",
+    "tesla:check": "node src/cli.ts tesla:check"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.3",
+    "@fastify/helmet": "^13.2.0",
+    "@fastify/rate-limit": "^11.2.1",
+    "@fastify/static": "^10.1.6",
+    "@gauss-hud/shared": "*",
+    "fastify": "^5.12.7",
+    "pino": "^10.4.0",
+    "zod": "^4.6.5"
+  }
+}

@@ -1,0 +1,29 @@
+# Signing proxy for vehicle commands (official tesla-http-proxy), for running the API on this
+# machine. The full deployment (app + proxy + ntfy on an internal network) comes in phase 4.
+#
+#   docker compose -f deploy/docker-compose.proxy.yml up -d
+#
+# Needs secrets/private-key.pem (`npm run tesla:keys`) and a TLS pair in secrets/proxy-tls/
+# (see the README). Then in .env:
+#   TESLA_COMMAND_PROXY_URL=https://localhost:4443
+#   TESLA_PROXY_CA_PATH=secrets/proxy-tls/tls-cert.pem
+services:
+  tesla-http-proxy:
+    image: tesla/vehicle-command:0.4.1
+    command:
+      - -tls-key=/tls/tls-key.pem
+      - -cert=/tls/tls-cert.pem
+      - -key-file=/keys/private-key.pem
+      - -host=0.0.0.0
+      - -port=4443
+    volumes:
+      # The private key exists only here, read-only.
+      - ../secrets/private-key.pem:/keys/private-key.pem:ro
+      - ../secrets/proxy-tls:/tls:ro
+    # Loopback only: never reachable from the network.
+    ports:
+      - 127.0.0.1:4443:4443
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
