@@ -1,4 +1,4 @@
-import type { CommandOutcome, CommandProgress, VehicleCommand } from './commands.ts';
+import { isValidCommandValue, type CommandOutcome, type CommandProgress, type VehicleCommand } from './commands.ts';
 import type { VehicleProvider } from './provider.ts';
 import type { VehicleStatus } from './status.ts';
 
@@ -19,6 +19,8 @@ export async function refreshStatus(
 }
 
 export interface RunCommandOptions {
+  /** Required by commands that carry a value (`COMMAND_VALUES`), refused by the others. */
+  value?: number;
   onProgress?: (progress: CommandProgress) => void;
   wakeTimeoutMs?: number;
 }
@@ -31,7 +33,7 @@ export interface RunCommandOptions {
 export async function runCommand(
   provider: VehicleProvider,
   command: VehicleCommand,
-  { onProgress, wakeTimeoutMs = WAKE_TIMEOUT_MS }: RunCommandOptions = {},
+  { value, onProgress, wakeTimeoutMs = WAKE_TIMEOUT_MS }: RunCommandOptions = {},
 ): Promise<CommandOutcome> {
   const finish = (outcome: CommandOutcome) => {
     onProgress?.({ phase: 'done', outcome });
@@ -39,7 +41,7 @@ export async function runCommand(
   };
 
   onProgress?.({ phase: 'sending' });
-  if (!provider.capabilities.includes(command)) return finish('failed');
+  if (!provider.capabilities.includes(command) || !isValidCommandValue(command, value)) return finish('failed');
   if (!(await provider.hasKey())) return finish('no_key');
 
   const connection = await provider.connection();
@@ -52,5 +54,5 @@ export async function runCommand(
     if (!(await provider.wake(wakeTimeoutMs))) return finish('timeout');
   }
 
-  return finish(await provider.execute(command));
+  return finish(await provider.execute(command, value));
 }

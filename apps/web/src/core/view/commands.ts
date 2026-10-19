@@ -7,8 +7,10 @@ export interface QuickAction {
   /** Stable identity of the button, whichever command it currently sends. */
   readonly key: QuickActionKey;
   readonly command: VehicleCommand;
-  /** What Enter does. */
+  /** What Enter does, in full (spoken, and in the outcome toast). */
   readonly label: string;
+  /** Short text on the button, e.g. "Turn on". */
+  readonly title: string;
   /** The function is on (climate, guard mode, charge port open or charging). */
   readonly active: boolean;
   readonly needsPin: boolean;
@@ -45,6 +47,7 @@ export function toQuickActions(
       key,
       command,
       label: t.commands[command],
+      title: t.actions[command],
       active,
       needsPin: COMMAND_INFO[command].needsPin,
     }));

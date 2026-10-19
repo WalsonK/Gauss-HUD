@@ -22,12 +22,14 @@ describe('status view', () => {
   it('formats the figures and the charging session', () => {
     const view = toStatusView(base, { monthCost: 2.4, monthlyCredit: 10, currency: 'EUR' }, NOW, en);
     assert.equal(view.battery, '72 %');
-    assert.equal(view.range, '318 km');
+    assert.equal(view.name, 'Gauss');
+    assert.equal(view.guard, 'Off');
     assert.equal(view.charging, 'Charging');
     assert.equal(view.chargingValue, '11 kW');
     assert.match(view.chargingDetail ?? '', /^Until \d{2}:\d{2}/);
     assert.equal(view.badge, null);
-    assert.equal(view.usage?.text, 'API €2.40 / €10.00');
+    assert.equal(view.usage?.cost, '€2.40');
+    assert.equal(view.usage.credit, '€10.00');
     assert.equal(view.usage.progress, 0.24);
     assert.equal(view.usage.alert, false);
     assert.equal(view.batteryProgress, 0.72);
@@ -78,6 +80,13 @@ describe('quick actions', () => {
       ['climate', 'guard', 'charge'],
     );
     assert.equal(actions.find((a) => a.key === 'trunk')?.needsPin, true);
+  });
+
+  it('puts a short verb on each button and keeps the full label', () => {
+    const climate = toQuickActions(all, { ...base, climateOn: false }, fr).find((a) => a.key === 'climate');
+    assert.ok(climate);
+    assert.equal(climate.title, 'Allumer');
+    assert.equal(climate.label, 'Allumer la clim');
   });
 
   it('makes the charge button follow the cable', () => {

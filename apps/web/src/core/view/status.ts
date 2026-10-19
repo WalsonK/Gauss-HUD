@@ -3,12 +3,13 @@ import type { I18n } from '../i18n/index.ts';
 
 /** Display-ready strings for the status screen; any HUD can lay them out its own way. */
 export interface StatusView {
+  /** The vehicle's own name; null when the vehicle API has none. */
+  readonly name: string | null;
   /** Battery level from 0 to 1, for a gauge. */
   readonly batteryProgress: number;
   /** Spoken battery level, e.g. "Battery 72 %". */
   readonly batteryLabel: string;
   readonly battery: string;
-  readonly range: string;
   /** "Charging" / "Not charging". */
   readonly charging: string;
   /** Charging power, or whether the cable is plugged in; null when unplugged. */
@@ -17,15 +18,17 @@ export interface StatusView {
   readonly lock: string;
   readonly cabin: string;
   readonly climate: string;
+  readonly guard: string;
   readonly updated: string;
   /** Asleep or offline: the figures come from the last read. */
   readonly badge: string | null;
   /**
-   * API spend vs monthly credit: short text, spoken label, fill from 0 to 1, and whether it nears
-   * the credit (from {@link USAGE_ALERT_RATIO}), the only case a glanceable HUD needs to show it.
+   * API spend vs monthly credit: both amounts, spoken label, fill from 0 to 1, and whether it nears
+   * the credit (from {@link USAGE_ALERT_RATIO}), to stand out.
    */
   readonly usage: {
-    readonly text: string;
+    readonly cost: string;
+    readonly credit: string;
     readonly label: string;
     readonly progress: number;
     readonly alert: boolean;
@@ -34,6 +37,11 @@ export interface StatusView {
 
 /** Share of the monthly credit from which the API spend is worth flagging. */
 export const USAGE_ALERT_RATIO = 0.8;
+
+/** A temperature as shown, e.g. "21,5 °C". */
+export function formatTemp(celsius: number, { locale }: I18n): string {
+  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(celsius)} °C`;
+}
 
 export function formatUpdated(updatedAt: string, now: number, { t }: I18n): string {
   const minutes = Math.max(0, Math.floor((now - Date.parse(updatedAt)) / 60_000));
@@ -64,7 +72,8 @@ export function toStatusView(status: VehicleStatus, usage: UsageSummary | null, 
     const credit = money(usage.monthlyCredit, usage.currency);
     const progress = usage.monthlyCredit > 0 ? Math.min(1, usage.monthCost / usage.monthlyCredit) : 1;
     usageView = {
-      text: t.status.usage(cost, credit),
+      cost,
+      credit,
       label: t.status.usageLabel(cost, credit),
       progress,
       alert: progress >= USAGE_ALERT_RATIO,
@@ -72,16 +81,17 @@ export function toStatusView(status: VehicleStatus, usage: UsageSummary | null, 
   }
 
   return {
+    name: status.name,
     batteryProgress: status.batteryPercent / 100,
     batteryLabel: t.status.batteryLevel(battery),
     battery,
-    range: `${number(status.rangeKm)} km`,
     charging: charging ? t.status.charging : t.status.notCharging,
     chargingValue,
     chargingDetail,
     lock: status.locked ? t.status.locked : t.status.unlocked,
-    cabin: status.cabinTempC === null ? '—' : `${number(status.cabinTempC, 1)} °C`,
+    cabin: status.cabinTempC === null ? '—' : formatTemp(status.cabinTempC, i18n),
     climate: status.climateOn ? t.status.climateOn : t.status.climateOff,
+    guard: status.guardOn ? t.status.guardOn : t.status.guardOff,
     updated: formatUpdated(status.updatedAt, now, i18n),
     badge: status.connection === 'asleep' ? t.status.asleep : status.connection === 'offline' ? t.status.offline : null,
     usage: usageView,

@@ -46,6 +46,7 @@ export class MockVehicleProvider implements VehicleProvider {
     this.#connection = scenario === 'asleep' ? 'asleep' : scenario === 'offline' ? 'offline' : 'online';
     const at = this.#now().getTime();
     this.#status = {
+      name: 'Gauss',
       connection: this.#connection,
       // A sleeping or offline car was last read a while ago.
       updatedAt: new Date(at - (this.#connection === 'online' ? 0 : 47 * 60_000)).toISOString(),
@@ -57,6 +58,7 @@ export class MockVehicleProvider implements VehicleProvider {
       chargePortOpen: true,
       locked: true,
       cabinTempC: 19.5,
+      targetTempC: 21,
       climateOn: false,
       guardOn: false,
       moving: scenario === 'driving',
@@ -101,20 +103,22 @@ export class MockVehicleProvider implements VehicleProvider {
     return this.#scenario !== 'no_key';
   }
 
-  async execute(command: VehicleCommand): Promise<ExecuteResult> {
+  async execute(command: VehicleCommand, value?: number): Promise<ExecuteResult> {
     await delay(this.#latencyMs);
     if (this.#connection !== 'online') return 'timeout';
     if (this.#scenario === 'failing') return 'failed';
-    this.#status = { ...this.#status, ...this.#effect(command) };
+    this.#status = { ...this.#status, ...this.#effect(command, value) };
     return 'ok';
   }
 
-  #effect(command: VehicleCommand): Partial<VehicleStatus> {
+  #effect(command: VehicleCommand, value?: number): Partial<VehicleStatus> {
     switch (command) {
       case 'climate.on':
         return { climateOn: true };
       case 'climate.off':
         return { climateOn: false };
+      case 'climate.setTemp':
+        return value === undefined ? {} : { targetTempC: value };
       case 'charging.start':
         return this.#status.pluggedIn
           ? { charging: { powerKw: 11, endsAt: new Date(this.#now().getTime() + 100 * 60_000).toISOString() } }

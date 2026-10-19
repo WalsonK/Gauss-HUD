@@ -10,10 +10,9 @@ Gauss HUD is compatible with Tesla vehicles through the official Fleet API. It i
 
 One screen, built for a glance:
 
-- **Alerts, only when something is off:** an _asleep_ / _offline_ badge, and this month's estimated API spend as a fill bar once it reaches 80 % of the monthly credit.
-- **Battery:** level and fill bar as a compact header, plus the charging session (power, estimated end) when plugged in.
-- **Manual commands as round buttons, most used first:** climate (with the cabin temperature), rear trunk (PIN-protected), guard mode, charge. Each button offers what fits the current state (climate on → turn it off); the charge button opens or closes the port when unplugged and starts or stops charging when plugged in.
-- **Bottom line:** lock state and "updated X min ago" (or the progress of a command being sent).
+- **Top:** the vehicle's name.
+- **One row per function, state on the left and a long button on the right:** cabin temperature | climate on/off (a long press turns the button into a control: swipe left or right to set the target from 16 to 28 °C in half degrees, sent once the swipes stop); rear trunk (PIN-protected); guard mode state | guard mode on/off; battery level (with a fill bar and the session's power and end while charging) | charge. Each button offers what fits the current state (climate on → turn it off); the charge button opens or closes the port when unplugged and starts or stops charging when plugged in.
+- **Bottom:** lock state and "updated X min ago" (or the progress of a command being sent, and an _asleep_ / _offline_ badge), then this month's estimated API spend as a bar, the amount inside and the monthly credit at the end, turning orange from 80 %.
 
 **Deliberately out of scope:** unlocking, remote start, driving-related features, location, phone-key behaviour, scheduled or automated commands, and any use while driving.
 

@@ -23,7 +23,12 @@ export interface HudState {
   readonly now: number;
   readonly pair: (code: string) => Promise<PairResult>;
   readonly refresh: () => Promise<void>;
-  readonly send: (command: VehicleCommand, pin?: string) => Promise<CommandOutcome | 'busy'>;
+  readonly send: (command: VehicleCommand, args?: CommandArgs) => Promise<CommandOutcome | 'busy'>;
+}
+
+export interface CommandArgs {
+  readonly pin?: string;
+  readonly value?: number;
 }
 
 const HudContext = createContext<HudState | null>(null);
@@ -95,13 +100,14 @@ function useHudState(client: HudClient): HudState {
   );
 
   const send = useCallback(
-    async (command: VehicleCommand, pin?: string): Promise<CommandOutcome | 'busy'> => {
+    async (command: VehicleCommand, { pin, value }: CommandArgs = {}): Promise<CommandOutcome | 'busy'> => {
       if (busy.current) return 'busy';
       busy.current = true;
       setRunning({ command, phase: 'sending' });
       try {
         const outcome = await client.send(command, {
           pin,
+          value,
           onProgress: (progress) => {
             if (progress.phase !== 'done') setRunning({ command, phase: progress.phase });
           },
