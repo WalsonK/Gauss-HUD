@@ -12,7 +12,13 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "pair": "node src/cli.ts pair",
     "sessions:revoke": "node src/cli.ts sessions:revoke",
-    "pin:set": "node src/cli.ts pin:set"
+    "pin:set": "node src/cli.ts pin:set",
+    "tesla:keys": "node src/cli.ts tesla:keys",
+    "tesla:register": "node src/cli.ts tesla:register",
+    "tesla:login": "node src/cli.ts tesla:login",
+    "tesla:vehicles": "node src/cli.ts tesla:vehicles",
+    "tesla:pair-link": "node src/cli.ts tesla:pair-link",
+    "tesla:check": "node src/cli.ts tesla:check"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.3",

@@ -19,7 +19,7 @@ import type { Journal } from '../safety/journal.ts';
 import type { Usage } from '../safety/usage.ts';
 import { CapReachedError, wakeCapped } from './wrappers.ts';
 
-const STATUS_KEY = 'status';
+export const STATUS_KEY = 'status';
 const CHECKED_AT_KEY = 'status.checkedAt';
 
 export interface VehicleServiceOptions {

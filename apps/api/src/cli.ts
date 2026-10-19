@@ -2,8 +2,9 @@ import { stdin, stdout } from 'node:process';
 import { PAIRING_CODE_TTL_MS } from './auth/pairing.ts';
 import { PIN_DIGITS } from './auth/pin.ts';
 import { loadEnvFile, parseConfig } from './config.ts';
-import { createContext, type Context } from './context.ts';
+import { createContext } from './context.ts';
 import { createLogger } from './logger.ts';
+import { TESLA_COMMANDS, type CliCommand } from './vehicle/tesla/cli.ts';
 
 /** Reads a line without echoing it (PIN, secrets). */
 function askHidden(question: string): Promise<string> {
@@ -36,9 +37,7 @@ function askHidden(question: string): Promise<string> {
   });
 }
 
-type Command = (ctx: Context, args: string[]) => Promise<void> | void;
-
-const COMMANDS: Record<string, Command> = {
+const COMMANDS: Record<string, CliCommand> = {
   pair: ({ pairing }) => {
     const code = pairing.createCode();
     console.log(`Pairing code: ${code} (single use, valid ${PAIRING_CODE_TTL_MS / 60_000} minutes)`);
@@ -55,6 +54,8 @@ const COMMANDS: Record<string, Command> = {
     await pin.set(first);
     console.log('PIN saved.');
   },
+
+  ...TESLA_COMMANDS,
 };
 
 loadEnvFile();

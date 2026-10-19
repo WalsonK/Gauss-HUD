@@ -32,6 +32,18 @@ const EnvSchema = z.object({
 
   MOCK_SCENARIO: z.enum(MOCK_SCENARIOS).default('online'),
 
+  TESLA_CLIENT_ID: z.string().optional(),
+  TESLA_CLIENT_SECRET: z.string().optional(),
+  TESLA_REGION: z.enum(['eu', 'na']).default('eu'),
+  TESLA_VIN: z
+    .string()
+    .regex(/^[A-HJ-NPR-Z0-9]{17}$/, 'A VIN is 17 characters')
+    .optional(),
+  TESLA_PUBLIC_KEY_PATH: z.string().default('secrets/public-key.pem'),
+  TESLA_PRIVATE_KEY_PATH: z.string().default('secrets/private-key.pem'),
+  TESLA_COMMAND_PROXY_URL: z.url({ protocol: /^https$/ }).optional(),
+  TESLA_PROXY_CA_PATH: z.string().optional(),
+
   NTFY_URL: z.url().optional(),
   NTFY_TOPIC: z.string().optional(),
   NTFY_TOKEN: z.string().optional(),
@@ -41,6 +53,25 @@ export interface NtfyConfig {
   readonly url: string;
   readonly topic: string;
   readonly token: string | undefined;
+}
+
+/** Fleet API base URL per region; also the OAuth `audience`. */
+export const FLEET_API_URLS = {
+  eu: 'https://fleet-api.prd.eu.vn.cloud.tesla.com',
+  na: 'https://fleet-api.prd.na.vn.cloud.tesla.com',
+} as const;
+
+export interface TeslaConfig {
+  readonly clientId: string;
+  readonly clientSecret: string;
+  readonly fleetApiUrl: string;
+  /** Unset until chosen with `npm run tesla:vehicles`. */
+  readonly vin: string | undefined;
+  readonly publicKeyPath: string;
+  /** The signing proxy (tesla-http-proxy); commands need it, reads don't. */
+  readonly commandProxyUrl: string | undefined;
+  /** The proxy's own (usually self-signed) TLS certificate, trusted on top of the system ones. */
+  readonly proxyCaPath: string | undefined;
 }
 
 export interface Config {
@@ -59,6 +90,10 @@ export interface Config {
   readonly dataMinIntervalMs: number;
   readonly monthlyCreditEur: number;
   readonly mockScenario: z.infer<typeof EnvSchema>['MOCK_SCENARIO'];
+  /** Key pair for signed commands; generated before the application even exists. */
+  readonly teslaKeys: { readonly publicKeyPath: string; readonly privateKeyPath: string };
+  /** Null while the vehicle API application is not set up: the server then runs on the mock. */
+  readonly tesla: TeslaConfig | null;
   readonly ntfy: NtfyConfig | null;
 }
 
@@ -70,6 +105,8 @@ export function parseConfig(env: Record<string, string | undefined> = process.en
   const parsed = EnvSchema.safeParse(cleaned);
   if (!parsed.success) throw new Error(`Invalid configuration:\n${z.prettifyError(parsed.error)}`);
   const e = parsed.data;
+  if (e.TESLA_CLIENT_ID && !e.TESLA_CLIENT_SECRET)
+    throw new Error('Invalid configuration: TESLA_CLIENT_SECRET is missing');
   return {
     port: e.PORT,
     host: e.HOST,
@@ -85,6 +122,22 @@ export function parseConfig(env: Record<string, string | undefined> = process.en
     dataMinIntervalMs: e.DATA_MIN_INTERVAL_SEC * 1000,
     monthlyCreditEur: e.MONTHLY_CREDIT_EUR,
     mockScenario: e.MOCK_SCENARIO,
+    teslaKeys: {
+      publicKeyPath: fromRoot(e.TESLA_PUBLIC_KEY_PATH),
+      privateKeyPath: fromRoot(e.TESLA_PRIVATE_KEY_PATH),
+    },
+    tesla:
+      e.TESLA_CLIENT_ID && e.TESLA_CLIENT_SECRET
+        ? {
+            clientId: e.TESLA_CLIENT_ID,
+            clientSecret: e.TESLA_CLIENT_SECRET,
+            fleetApiUrl: FLEET_API_URLS[e.TESLA_REGION],
+            vin: e.TESLA_VIN,
+            publicKeyPath: fromRoot(e.TESLA_PUBLIC_KEY_PATH),
+            commandProxyUrl: e.TESLA_COMMAND_PROXY_URL?.replace(/\/+$/, ''),
+            proxyCaPath: e.TESLA_PROXY_CA_PATH && fromRoot(e.TESLA_PROXY_CA_PATH),
+          }
+        : null,
     ntfy: e.NTFY_URL && e.NTFY_TOPIC ? { url: e.NTFY_URL, topic: e.NTFY_TOPIC, token: e.NTFY_TOKEN } : null,
   };
 }
