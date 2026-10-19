@@ -61,12 +61,9 @@ describe('VehicleService.send', () => {
     assert.ok(!calls.some((c) => c.startsWith('execute')));
   });
 
-  it('asks the PIN for the trunk, and refuses when none is set', async () => {
-    const { service, pin } = testContext();
-    assert.equal(await service.send('trunk.rear', { pin: '246810' }), 'failed');
-    await pin.set('246810');
-    assert.equal(await service.send('trunk.rear', { pin: '000000' }), 'wrong_pin');
-    assert.equal(await service.send('trunk.rear', { pin: '246810' }), 'ok');
+  it('opens the trunk without a PIN', async () => {
+    const { service } = testContext();
+    assert.equal(await service.send('trunk.rear'), 'ok');
   });
 
   it('applies the daily command cap', async () => {

@@ -38,7 +38,7 @@ export const COMMAND_INFO: Readonly<Record<VehicleCommand, CommandInfo>> = {
   'chargePort.open': { needsPin: false, toggle: false },
   'chargePort.close': { needsPin: false, toggle: false },
   lock: { needsPin: false, toggle: false },
-  'trunk.rear': { needsPin: true, toggle: true },
+  'trunk.rear': { needsPin: false, toggle: true },
   'guard.on': { needsPin: false, toggle: false },
   'guard.off': { needsPin: false, toggle: false },
 };
