@@ -2,14 +2,21 @@ import { isMockScenario } from '@gauss-hud/shared';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HudProvider } from './core/hud.tsx';
+import type { HudClient } from './core/client.ts';
+import { HttpHudClient } from './core/httpClient.ts';
 import { createI18n, pickLocale } from './core/i18n/index.ts';
 import { MOCK_PAIRING_CODE, MOCK_PIN, MockHudClient } from './core/mockClient.ts';
 import { MrbdHud } from './hud/mrbd/MrbdHud.tsx';
 
-// Phase 1a: the HUD runs on an in-browser mock. An HTTP client against the API replaces it later.
+// The API by default; VITE_MOCK_SCENARIO runs the HUD alone on an in-browser mock instead.
 const scenario: unknown = import.meta.env.VITE_MOCK_SCENARIO;
-const client = new MockHudClient(isMockScenario(scenario) ? { scenario } : {});
-console.info(`[mock] pairing code ${MOCK_PAIRING_CODE}, trunk PIN ${MOCK_PIN}`);
+let client: HudClient;
+if (isMockScenario(scenario)) {
+  client = new MockHudClient({ scenario });
+  console.info(`[mock] pairing code ${MOCK_PAIRING_CODE}, trunk PIN ${MOCK_PIN}`);
+} else {
+  client = new HttpHudClient();
+}
 
 const i18n = createI18n(pickLocale(navigator.languages));
 document.documentElement.lang = i18n.locale;
