@@ -104,7 +104,7 @@ export class VehicleService {
     try {
       if (COMMAND_INFO[command].needsPin) {
         const check = await this.#o.pin.check(pin);
-        if (check === 'not_set') this.#o.log.warn('PIN not set: run `npm run pin:set` on the server');
+        if (check === 'not_set') this.#o.log.warn('PIN not set: run `pin:set` on the server');
         if (check !== 'ok') return finish(check === 'not_set' ? 'failed' : check);
       }
       if (this.#o.journal.sentToday() >= this.#o.dailyMaxCommands) return finish('cap_reached');

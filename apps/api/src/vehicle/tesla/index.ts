@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { getCACertificates, setDefaultCACertificates } from 'node:tls';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
@@ -49,9 +49,11 @@ export function createTesla(
     fetch?: Fetch;
   },
 ): Tesla {
-  if (tesla.proxyCaPath) {
+  if (tesla.proxyCaPath && existsSync(tesla.proxyCaPath)) {
     // Process-wide, so the built-in fetch accepts the proxy's certificate without NODE_EXTRA_CA_CERTS.
     setDefaultCACertificates([...getCACertificates('default'), readFileSync(tesla.proxyCaPath, 'utf8')]);
+  } else if (tesla.proxyCaPath) {
+    log.warn('TESLA_PROXY_CA_PATH does not exist yet: run `tesla:proxy-cert`, then restart');
   }
   const auth = new TeslaAuth(tesla, { publicOrigin: config.publicOrigin, kv, fetch: fetchImpl, now });
   const client = new FleetClient(tesla, { auth, usage, fetch: fetchImpl });
@@ -60,7 +62,7 @@ export function createTesla(
   const routes = (app: FastifyInstance) => {
     app.get(PUBLIC_KEY_PATH, async (_request, reply) => {
       const pem = await readFile(tesla.publicKeyPath, 'utf8').catch(() => null);
-      if (!pem) return reply.code(404).send('Public key not generated yet: run `npm run tesla:keys`');
+      if (!pem) return reply.code(404).send('Public key not generated yet: run `tesla:keys`');
       return reply.type('application/x-pem-file').send(pem);
     });
 
@@ -91,7 +93,7 @@ export function createTesla(
         if (refreshed) log.info('vehicle API token refreshed');
       })
       .catch((error: unknown) => {
-        log.error({ err: error }, 'vehicle API token refresh failed: run `npm run tesla:login` if it persists');
+        log.error({ err: error }, 'vehicle API token refresh failed: run `tesla:login` if it persists');
       });
   };
 

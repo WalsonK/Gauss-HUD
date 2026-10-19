@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { Context } from '../../context.ts';
 import type { Tesla } from './index.ts';
 import { PUBLIC_KEY_PATH } from './index.ts';
+import { createProxyTlsPair } from './proxyCert.ts';
 
 export type CliCommand = (ctx: Context, args: string[]) => Promise<void> | void;
 
@@ -22,6 +23,21 @@ function domain(ctx: Context): string {
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 
+/** Writes a private key; `wx` never overwrites one, since a new key means redoing a setup step. */
+function writePrivate(path: string, pem: string): void {
+  mkdirSync(dirname(path), { recursive: true });
+  try {
+    writeFileSync(path, pem, { flag: 'wx', mode: 0o600 });
+  } catch {
+    throw new Error(`${path} already exists: delete it yourself if you really want a new one`);
+  }
+}
+
+function writePublic(path: string, pem: string): void {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, pem, { mode: 0o644 });
+}
+
 /** One-time onboarding steps with the vehicle API, in the order of the README. */
 export const TESLA_COMMANDS: Record<string, CliCommand> = {
   /** EC P-256 key pair: the private key goes to the signing proxy only, the public one is served. */
@@ -32,17 +48,24 @@ export const TESLA_COMMANDS: Record<string, CliCommand> = {
       publicKeyEncoding: { type: 'spki', format: 'pem' },
       privateKeyEncoding: { type: 'sec1', format: 'pem' },
     });
-    mkdirSync(dirname(privateKeyPath), { recursive: true });
-    mkdirSync(dirname(publicKeyPath), { recursive: true });
-    try {
-      // `wx`: never overwrite, a new key means pairing the vehicle again.
-      writeFileSync(privateKeyPath, privateKey, { flag: 'wx', mode: 0o600 });
-    } catch {
-      throw new Error(`${privateKeyPath} already exists: delete it yourself if you really want a new key pair`);
-    }
-    writeFileSync(publicKeyPath, publicKey, { mode: 0o644 });
+    // A new key pair means pairing the vehicle again.
+    writePrivate(privateKeyPath, privateKey);
+    writePublic(publicKeyPath, publicKey);
     console.log(`Private key: ${privateKeyPath} (for the signing proxy only, never share it)`);
     console.log(`Public key:  ${publicKeyPath} (served at ${PUBLIC_KEY_PATH})`);
+  },
+
+  /** Self-signed TLS pair of the signing proxy, valid for the host of TESLA_COMMAND_PROXY_URL. */
+  'tesla:proxy-cert': ({ config }) => {
+    const { keyPath, certPath, url } = config.proxyTls;
+    const proxyHost = url ? [new URL(url).hostname] : [];
+    const hostnames = [...new Set([...proxyHost, 'localhost', '127.0.0.1'])];
+    const { key, cert } = createProxyTlsPair(hostnames);
+    writePrivate(keyPath, key);
+    writePublic(certPath, cert);
+    console.log(`Proxy TLS key:         ${keyPath} (for the signing proxy only)`);
+    console.log(`Proxy TLS certificate: ${certPath} (valid for ${hostnames.join(', ')})`);
+    if (!url) console.log('TESLA_COMMAND_PROXY_URL is not set: the certificate only covers localhost.');
   },
 
   /** Registers this domain with the vehicle API in the configured region. */
@@ -101,7 +124,7 @@ export const TESLA_COMMANDS: Record<string, CliCommand> = {
     const tesla = requireTesla(ctx);
     await tesla.auth.refresh();
     console.log('Token: refreshed and saved');
-    if (!tesla.provider || !tesla.config.vin) throw new Error('Set TESLA_VIN (see `npm run tesla:vehicles`)');
+    if (!tesla.provider || !tesla.config.vin) throw new Error('Set TESLA_VIN (see `tesla:vehicles`)');
     console.log(`Connection: ${await tesla.provider.connection()}`);
     const fleetStatus = await tesla.client.post('/api/1/vehicles/fleet_status', {
       kind: 'data',

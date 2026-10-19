@@ -42,6 +42,9 @@ export async function buildApp(ctx: Context): Promise<FastifyInstance> {
     if (!pairing.verify(request.cookies[SESSION_COOKIE])) await reply.code(401).send({ error: 'unauthorized' });
   };
 
+  // Container healthcheck: polled every 30 s, so kept out of the info logs.
+  app.get('/api/health', { logLevel: 'warn' }, () => ({ ok: true }));
+
   app.get('/api/session', (request) => ({ paired: pairing.verify(request.cookies[SESSION_COOKIE]) }));
 
   app.post(

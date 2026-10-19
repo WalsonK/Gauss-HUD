@@ -107,7 +107,7 @@ export class TeslaAuth {
       expected.expiresAt > this.#now() &&
       expected.value.length === state.length &&
       timingSafeEqual(Buffer.from(expected.value), Buffer.from(state));
-    if (!valid) throw new TeslaAuthError('Unknown or expired sign-in link: run `npm run tesla:login` again');
+    if (!valid) throw new TeslaAuthError('Unknown or expired sign-in link: run `tesla:login` again');
     await this.#requestTokens({
       grant_type: 'authorization_code',
       client_id: this.#config.clientId,
@@ -121,7 +121,7 @@ export class TeslaAuth {
   /** A valid access token, refreshed first when it is about to expire. */
   async accessToken(): Promise<string> {
     const tokens = this.#tokens();
-    if (!tokens) throw new TeslaAuthError('Not signed in to the vehicle API: run `npm run tesla:login`');
+    if (!tokens) throw new TeslaAuthError('Not signed in to the vehicle API: run `tesla:login`');
     if (tokens.expiresAt - EXPIRY_MARGIN_MS > this.#now()) return tokens.accessToken;
     return this.refresh();
   }
@@ -131,7 +131,7 @@ export class TeslaAuth {
     this.#refreshing ??= (async () => {
       try {
         const tokens = this.#tokens();
-        if (!tokens) throw new TeslaAuthError('Not signed in to the vehicle API: run `npm run tesla:login`');
+        if (!tokens) throw new TeslaAuthError('Not signed in to the vehicle API: run `tesla:login`');
         return await this.#requestTokens({
           grant_type: 'refresh_token',
           client_id: this.#config.clientId,

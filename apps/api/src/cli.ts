@@ -62,7 +62,7 @@ loadEnvFile();
 const [name = '', ...args] = process.argv.slice(2);
 const command = COMMANDS[name];
 if (!command) {
-  console.error(`Usage: node src/cli.ts <${Object.keys(COMMANDS).join(' | ')}>`);
+  console.error(`Usage: gauss <${Object.keys(COMMANDS).join(' | ')}>`);
   process.exit(2);
 }
 

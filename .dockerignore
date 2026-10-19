@@ -1,0 +1,11 @@
+# Only the sources the Dockerfile copies; never local data, keys or env files.
+**/node_modules
+**/dist
+data
+secrets
+.env
+.env.*
+.git
+.github
+.claude
+**/*.tsbuildinfo

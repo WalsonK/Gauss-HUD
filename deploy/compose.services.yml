@@ -1,0 +1,97 @@
+# Gauss HUD services, to PASTE into the docker-compose.yml that already runs your nginx reverse proxy
+# (this file is not meant to run on its own). Deployment guide: README > Deploy.
+#
+#   1. Copy the three services below under `services:` of your docker-compose.yml.
+#   2. Replace `nginx-net` with the network of your nginx container (in `gauss-hud` and in `networks:`)
+#      and add `gauss-internal` to your `networks:`. Do not copy the `networks:` block below as is.
+#   3. Paths are relative to your docker-compose.yml:
+#        .gauss-env        settings, from .env.example (paths already set by the image: leave them empty)
+#        gauss-data/       the SQLite database
+#        gauss-secrets/    private/ (signing proxy only) and public/ (read-only in the app)
+#      Create the folders owned by uid 1000 BEFORE the first start, or Docker creates them as root:
+#        mkdir -p gauss-data gauss-secrets/private gauss-secrets/public && sudo chown -R 1000:1000 gauss-data gauss-secrets
+#
+# Onboarding and maintenance commands go through the one-shot gauss-cli service:
+#   docker compose run --rm gauss-cli pair
+#
+# Check after pasting: docker compose config --quiet
+
+services:
+  gauss-hud:
+    image: ghcr.io/walsonk/gauss-hud:0.1
+    container_name: gauss-hud
+    env_file:
+      - .gauss-env
+    environment:
+      TESLA_COMMAND_PROXY_URL: https://gauss-tesla-proxy:4443
+    volumes:
+      - ./gauss-data:/data
+      # Public key (served to the vehicle API) and the proxy's certificate. Never the private keys.
+      - ./gauss-secrets/public:/secrets/public:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # No published port: nginx reaches gauss-hud:3000 on its network.
+    restart: unless-stopped
+    networks:
+      - nginx-net
+      - gauss-internal
+
+  # Official signing proxy for vehicle commands. Only gauss-hud can reach it; it needs outbound
+  # internet access to the vehicle API, so gauss-internal is a plain bridge, not `internal: true`.
+  gauss-tesla-proxy:
+    image: tesla/vehicle-command:0.4.1
+    container_name: gauss-tesla-proxy
+    command:
+      - -tls-key=/secrets/private/tls-key.pem
+      - -cert=/secrets/public/tls-cert.pem
+      - -key-file=/secrets/private/private-key.pem
+      - -host=0.0.0.0
+      - -port=4443
+    # The keys are written by uid 1000 with mode 0600 (the image's default user, 65532, cannot read them).
+    user: '1000:1000'
+    working_dir: /
+    volumes:
+      - ./gauss-secrets/private:/secrets/private:ro
+      - ./gauss-secrets/public:/secrets/public:ro
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    networks:
+      - gauss-internal
+
+  # One-shot CLI, never started by `up`: docker compose run --rm gauss-cli <command>.
+  # The only service that can write the keys.
+  gauss-cli:
+    image: ghcr.io/walsonk/gauss-hud:0.1
+    profiles:
+      - cli
+    entrypoint: ['gauss']
+    env_file:
+      - .gauss-env
+    environment:
+      TESLA_COMMAND_PROXY_URL: https://gauss-tesla-proxy:4443
+    volumes:
+      - ./gauss-data:/data
+      - ./gauss-secrets:/secrets
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - gauss-internal
+
+# Only so this file validates on its own: on your server, nginx-net is your existing network.
+networks:
+  nginx-net:
+  gauss-internal:
