@@ -1,13 +1,6 @@
-import type { CommandOutcome, CommandProgress, UsageSummary, VehicleCommand, VehicleStatus } from '@gauss-hud/shared';
+import type { CommandOutcome, CommandProgress, HudSnapshot, PairResult, VehicleCommand } from '@gauss-hud/shared';
 
-/** Everything a HUD screen displays. */
-export interface HudSnapshot {
-  readonly status: VehicleStatus | null;
-  readonly usage: UsageSummary | null;
-  readonly capabilities: readonly VehicleCommand[];
-}
-
-export type PairResult = 'ok' | 'invalid' | 'too_many';
+export type { HudSnapshot, PairResult };
 
 export interface SendOptions {
   readonly pin?: string;

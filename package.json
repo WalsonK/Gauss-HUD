@@ -14,7 +14,12 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @gauss-hud/web",
+    "dev:api": "npm run dev -w @gauss-hud/api",
     "build": "npm run build -w @gauss-hud/web",
+    "start": "npm start -w @gauss-hud/api",
+    "pair": "npm run pair -w @gauss-hud/api",
+    "pin:set": "npm run pin:set -w @gauss-hud/api",
+    "sessions:revoke": "npm run sessions:revoke -w @gauss-hud/api",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "npm run typecheck --workspaces --if-present",
